@@ -1,14 +1,22 @@
 import type { Instruction, InstructionVersion, Feedback } from '$lib/types';
 
+// const startingInstruction = `Generate a concise HPI for emergency medicine documentation that:
+// - Captures chief complaint and relevant history
+// - Uses clear, professional medical terminology
+// - Includes pertinent positives and negatives
+// - Follows chronological order when possible
+// - Avoids redundancy and maintains brevity`;
+
+const startingInstruction = `The patient or I may speak in laymans terms but please always convert to medical terminology like "tummy troubles"->"gastrointestinal symptoms".
+some terms to avoid converting from layman to medical: ["headache", "lack of appetite"]
+if, during an update, the patient gives more historical information, add that here, not in the reeval section. evaluation items should still go in eval section, but the historical components go here. do not include plan items in history
+Do not create dedicated subsections for medications, surgeries, allergies etc.
+PAY CLOSE ATTENTION do not include assessments/plan/treatments i make in the room in this section. If i am explaining treatments to the patient, those go in evaluation and plan. Do not mention clinician's concerns in this section.`;
+
 class InstructionsStore {
   private currentInstruction = $state<Instruction>({
     id: 'default',
-    content: `Generate a concise HPI for emergency medicine documentation that:
-- Captures chief complaint and relevant history
-- Uses clear, professional medical terminology
-- Includes pertinent positives and negatives
-- Follows chronological order when possible
-- Avoids redundancy and maintains brevity`,
+    content: startingInstruction,
     createdAt: new Date(),
     updatedAt: new Date(),
     version: 1
@@ -39,7 +47,7 @@ class InstructionsStore {
 
   updateInstructions(newContent: string, feedback: string, changes: string[]) {
     const newVersion = this.currentInstruction.version + 1;
-    
+
     const versionEntry: InstructionVersion = {
       id: `v${newVersion}`,
       instructionId: this.currentInstruction.id,
@@ -51,7 +59,7 @@ class InstructionsStore {
     };
 
     this.versions.push(versionEntry);
-    
+
     this.currentInstruction = {
       ...this.currentInstruction,
       content: newContent,

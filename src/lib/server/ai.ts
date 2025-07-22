@@ -2,6 +2,7 @@ import { openai } from '@ai-sdk/openai';
 import { generateObject, generateText, jsonSchema, experimental_transcribe as transcribe } from 'ai';
 import type { InstructionUpdate } from '$lib/types';
 import { OPENAI_API_KEY } from '$env/static/private';
+import { AI_MODELS } from '$lib/config/ai';
 
 // Schema for voice feedback processing
 const voiceFeedbackSchema = jsonSchema<{
@@ -92,7 +93,7 @@ export async function transcribeAudio(audioFile: File): Promise<string> {
     const audioBuffer = await audioFile.arrayBuffer();
 
     const result = await transcribe({
-      model: openai.transcription('whisper-1'),
+      model: openai.transcription(AI_MODELS.TRANSCRIPTION),
       audio: audioBuffer
     });
 
@@ -108,7 +109,7 @@ export async function processVoiceFeedback(
   currentInstructions: string
 ) {
   const { object } = await generateObject({
-    model: openai('gpt-4.1-mini'),
+    model: openai(AI_MODELS.PROCESSING),
     schema: voiceFeedbackSchema,
     prompt: `You are an AI medical scribe instruction optimizer.
 
@@ -132,7 +133,7 @@ Focus on making the instructions clearer and more effective for generating medic
 
 export async function optimizeInstructions(instructions: string) {
   const { object } = await generateObject({
-    model: openai('gpt-4.1-mini'),
+    model: openai(AI_MODELS.OPTIMIZATION),
     schema: optimizationSchema,
     prompt: `You are an expert in medical documentation and AI instruction optimization.
 
@@ -165,7 +166,7 @@ export async function mergeInstructionUpdate(
   }
 ) {
   const { object } = await generateObject({
-    model: openai('gpt-4.1-mini'),
+    model: openai(AI_MODELS.PROCESSING),
     schema: instructionMergeSchema,
     prompt: `You are an AI medical scribe instruction optimizer.
 
