@@ -95,3 +95,7 @@ The project includes AI SDK dependencies but no implementation yet. When impleme
 - Test API routes with integration tests
 - Mock external services (AI APIs) in tests
 - Use Playwright for E2E testing of critical flows
+
+### AI Model Configuration
+
+- Use gpt-4.1-mini by default for openai models and gpt-4o-mini-transcribe for openai transcription model

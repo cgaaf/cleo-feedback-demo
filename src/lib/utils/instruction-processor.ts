@@ -1,4 +1,5 @@
 import type { InstructionUpdate } from '$lib/types';
+import { mergeInstructionUpdate } from '$lib/server/ai';
 
 export interface ProcessingOptions {
   preserveStructure?: boolean;
@@ -41,14 +42,33 @@ export function parseInstructionChanges(
   return changes;
 }
 
-export function createInstructionUpdate(
+export async function createInstructionUpdate(
   currentContent: string,
   feedback: string,
-  processedChanges: string
-): InstructionUpdate {
-  // In a real implementation, this would use an LLM to intelligently merge feedback
-  // For demo purposes, we'll simulate intelligent placement
+  processedChanges: string,
+  instructionUpdate?: {
+    action: 'add' | 'remove' | 'modify' | 'clarify';
+    target: string;
+    details: string;
+  }
+): Promise<InstructionUpdate> {
+  // Use AI to intelligently merge feedback if instructionUpdate is provided
+  if (instructionUpdate) {
+    const result = await mergeInstructionUpdate(
+      currentContent,
+      feedback,
+      instructionUpdate
+    );
+    
+    return {
+      oldContent: currentContent,
+      newContent: result.mergedContent,
+      feedback,
+      changes: result.appliedChanges
+    };
+  }
   
+  // Fallback to simple appending if no AI update provided
   const lines = currentContent.split('\n');
   const newContent = applyFeedbackToInstructions(lines, feedback, processedChanges);
   const changes = parseInstructionChanges(currentContent, newContent, feedback);
