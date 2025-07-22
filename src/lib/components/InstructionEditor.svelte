@@ -49,7 +49,7 @@
 
 <div class="bg-white rounded-lg shadow-md p-6">
   <div class="flex justify-between items-center mb-4">
-    <h3 class="text-lg font-semibold text-gray-800">Current Instructions</h3>
+    <h3 class="text-lg font-semibold text-gray-800">HPI Instructions</h3>
     <div class="flex items-center space-x-2">
       <span class="text-sm text-gray-500">Version {current.version}</span>
       {#if editable && !isEditing && !processing.isProcessing}
