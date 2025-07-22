@@ -92,12 +92,39 @@ class RecordingStore {
     }
   }
 
-  stopRecording() {
-    if (this.mediaRecorder && this.state.isRecording) {
-      this.mediaRecorder.stop();
-      this.state.isRecording = false;
-      this.state.isPaused = false;
-    }
+  async stopRecording(): Promise<VoiceRecording | null> {
+    return new Promise((resolve, reject) => {
+      try {
+        if (!this.mediaRecorder || !this.state.isRecording) {
+          resolve(null);
+          return;
+        }
+
+        // Store reference to ensure it's not null
+        const recorder = this.mediaRecorder;
+        
+        // Set up the handler to resolve when recording is ready
+        const originalOnStop = recorder.onstop;
+        recorder.onstop = (event) => {
+          try {
+            // Call the original handler to create the recording
+            originalOnStop?.call(recorder, event);
+            // Resolve with the recording
+            resolve(this.currentRecording);
+          } catch (error) {
+            this.state.error = 'Failed to process recording';
+            reject(error);
+          }
+        };
+
+        recorder.stop();
+        this.state.isRecording = false;
+        this.state.isPaused = false;
+      } catch (error) {
+        this.state.error = 'Failed to stop recording';
+        reject(error);
+      }
+    });
   }
 
   private cleanup() {

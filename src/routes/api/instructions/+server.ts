@@ -23,17 +23,17 @@ export const GET: RequestHandler = async () => {
 export const POST: RequestHandler = async ({ request }) => {
   try {
     const update: InstructionUpdate = await request.json();
-    
+
     if (!update.newContent || !update.feedback) {
-      return json({ 
-        error: 'Missing required fields' 
+      return json({
+        error: 'Missing required fields'
       }, { status: 400 });
     }
 
     // Validate the new instructions
     const validation = validateInstructions(update.newContent);
     if (!validation.isValid) {
-      return json({ 
+      return json({
         error: 'Invalid instructions',
         errors: validation.errors
       }, { status: 400 });
@@ -54,8 +54,8 @@ export const POST: RequestHandler = async ({ request }) => {
 
   } catch (error) {
     console.error('Instruction update error:', error);
-    return json({ 
-      error: 'Failed to update instructions' 
+    return json({
+      error: 'Failed to update instructions'
     }, { status: 500 });
   }
 };

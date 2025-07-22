@@ -8,13 +8,18 @@
   const recording = $derived(recordingStore.recording);
   
   async function toggleRecording() {
-    if (state.isRecording) {
-      await recordingStore.stopRecording();
-      if (recording && onRecordingComplete) {
-        onRecordingComplete(recording.blob);
+    try {
+      if (state.isRecording) {
+        const completedRecording = await recordingStore.stopRecording();
+        if (completedRecording && onRecordingComplete) {
+          onRecordingComplete(completedRecording.blob);
+        }
+      } else {
+        await recordingStore.startRecording();
       }
-    } else {
-      await recordingStore.startRecording();
+    } catch (error) {
+      console.error('Error toggling recording:', error);
+      // Error will be displayed through the state.error reactive binding
     }
   }
   

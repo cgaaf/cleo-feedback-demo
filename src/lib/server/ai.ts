@@ -1,5 +1,5 @@
 import { openai } from '@ai-sdk/openai';
-import { generateObject, generateText, jsonSchema } from 'ai';
+import { generateObject, generateText, jsonSchema, experimental_transcribe as transcribe } from 'ai';
 import type { InstructionUpdate } from '$lib/types';
 import { OPENAI_API_KEY } from '$env/static/private';
 
@@ -87,24 +87,20 @@ const instructionMergeSchema = jsonSchema<{
 });
 
 export async function transcribeAudio(audioFile: File): Promise<string> {
-  const formData = new FormData();
-  formData.append('file', audioFile);
-  formData.append('model', 'gpt-4o-mini-transcribe');
+  try {
+    // Convert File to ArrayBuffer for AI SDK compatibility
+    const audioBuffer = await audioFile.arrayBuffer();
 
-  const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${OPENAI_API_KEY}`
-    },
-    body: formData
-  });
+    const result = await transcribe({
+      model: openai.transcription('whisper-1'),
+      audio: audioBuffer
+    });
 
-  if (!response.ok) {
-    throw new Error(`Transcription failed: ${response.statusText}`);
+    return result.text;
+  } catch (error) {
+    console.error('Transcription error:', error);
+    throw new Error(`Failed to transcribe audio: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
-
-  const result = await response.json();
-  return result.text;
 }
 
 export async function processVoiceFeedback(
